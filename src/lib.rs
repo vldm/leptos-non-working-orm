@@ -2,7 +2,7 @@ use leptos::*;
 
 pub mod db;
 pub mod display_list;
-use display_list::DisplayList;
+use display_list::{DisplayList, DisplayListProps};
 
 #[derive(Clone)]
 struct MyObject {
@@ -45,9 +45,17 @@ pub fn App(cx: Scope) -> impl IntoView {
     // 1. This could solve the issue, but DisplayList is a fn, not a Type.
     // type MyDisplayList<U,V> = DisplayList<MyObject, U, V>;
     // use DisplayList::<T,_,_> as _;
+
+    fn MyDisplayList<FV, V>(cx:Scope, props: DisplayListProps<MyObject, FV, V>) -> impl IntoView    
+    where
+        FV: Fn(Scope, &MyObject) -> V + 'static,
+        V: IntoView,
+    {
+        DisplayList(cx, props)
+    }
     view! { cx,
         "I have a table and want to render it:"
-        <DisplayList
+        <MyDisplayList
             bind:my_object
             //
             // error[E0282]: type annotations needed for `&_`
@@ -68,7 +76,7 @@ pub fn App(cx: Scope) -> impl IntoView {
         >
             {&my_object.name}" => "{my_object.age}
 
-        </DisplayList>
+        </MyDisplayList>
 
         // 3. Type in component probably can solve the issue too
         // <DisplayList<T, _,_>
